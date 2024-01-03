@@ -18,11 +18,7 @@ require("./databases/init.mongodb.js");
 // checkingOverload();
 
 //init routes
-app.get("/", (req, res, next) => {
-  return res.status(200).json({
-    message: "Welcome to eCommerce Project!",
-  });
-});
+app.use("/", require("./routers"));
 
 //handling errors
 
