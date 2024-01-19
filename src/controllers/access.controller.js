@@ -1,14 +1,8 @@
+const AccessServiceSimple = require("../services/access_simple.service");
+
 class AccessController {
-  signUp = async (req, res, next) => {
-    try {
-      console.log("[P]::signup::", req.body);
-      return res.status(201).json({
-        code: "20001",
-        meteData: { userId: 1 },
-      });
-    } catch (error) {
-      next(error);
-    }
+  signUp = async (req, res) => {
+    return res.status(201).json(await AccessServiceSimple.signUp(req.body));
   };
 }
 

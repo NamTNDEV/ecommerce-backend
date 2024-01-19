@@ -12,7 +12,7 @@ const roleShop = {
   admin: "ADMIN",
 };
 
-class AccessService {
+class AccessServiceSimple {
   static signUp = async ({ name, email, password }) => {
     try {
       //Step 1: Check email is existed
@@ -37,36 +37,26 @@ class AccessService {
       });
 
       if (newShop) {
-        //Create privateKey, publicKey
-        const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-          modulusLength: 4096,
-          publicKeyEncoding: {
-            type: "pkcs1",
-            format: "pem",
-          },
-          privateKeyEncoding: {
-            type: "pkcs1",
-            format: "pem",
-          },
-        });
+        const privateKey = crypto.randomBytes(64).toString("hex");
+        const publicKey = crypto.randomBytes(64).toString("hex");
 
         const userIdString = newShop._id.toString();
-        const publicKeyString = await KeyTokenService.createKeyToken({
+        const keySotre = await KeyTokenService.createKeyToken({
           userId: userIdString,
           publicKey,
+          privateKey,
         });
 
-        if (!publicKeyString) {
+        if (!keySotre) {
           return {
             code: "xxxx",
-            message: "publicKeyString error!!!",
+            message: "keySotre error!!!",
           };
         }
 
-        const publicKeyObject = crypto.createPublicKey(publicKeyString);
         const tokens = await createTokenPair(
           { userId: newShop._id, email },
-          publicKeyObject,
+          publicKey,
           privateKey
         );
 
@@ -96,4 +86,4 @@ class AccessService {
   };
 }
 
-module.exports = AccessService;
+module.exports = AccessServiceSimple;
