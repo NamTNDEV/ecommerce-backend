@@ -5,6 +5,7 @@ const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getIntoData } = require("../utils");
 const { BadRequestError } = require("../core/error.response");
+const { findByEmail } = require("./shop.service");
 
 const roleShop = {
   shop: "SHOP",
@@ -14,6 +15,20 @@ const roleShop = {
 };
 
 class AccessServiceSimple {
+  static signIn = async ({ email, password, refreshToken = null }) => {
+    // 1 - check email in db
+    const foundShop = await findByEmail({ email });
+    if (!foundShop) throw new BadRequestError("Shop not registered");
+
+    // 2 - match password
+    const isMatch = bcrypt.compare(password, foundShop.password);
+    if (!isMatch) throw new AuthFailureRequest("Authentication error");
+
+    // 3 - create AT and RT and save
+    // 4 - generate tokens
+    // 5 - get data return login
+  };
+
   static signUp = async ({ name, email, password }) => {
     //Step 1: Check email is existed
     const holderShop = await shopModel
