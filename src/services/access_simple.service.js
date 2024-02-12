@@ -4,7 +4,10 @@ const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getIntoData } = require("../utils");
-const { BadRequestError } = require("../core/error.response");
+const {
+  BadRequestError,
+  AuthFailureRequest,
+} = require("../core/error.response");
 const { findByEmail } = require("./shop.service");
 
 const roleShop = {
@@ -25,8 +28,32 @@ class AccessServiceSimple {
     if (!isMatch) throw new AuthFailureRequest("Authentication error");
 
     // 3 - create AT and RT and save
+    const privateKey = crypto.randomBytes(64).toString("hex");
+    const publicKey = crypto.randomBytes(64).toString("hex");
+
     // 4 - generate tokens
+    const { _id: userId } = foundShop;
+    const tokens = await createTokenPair(
+      { userId, email },
+      publicKey,
+      privateKey
+    );
+
+    await KeyTokenService.createKeyToken({
+      refreshToken: tokens.refreshToken,
+      privateKey,
+      publicKey,
+      userId,
+    });
+
     // 5 - get data return login
+    return {
+      shop: getIntoData({
+        fields: ["_id", "name", "email"],
+        object: foundShop,
+      }),
+      tokens,
+    };
   };
 
   static signUp = async ({ name, email, password }) => {

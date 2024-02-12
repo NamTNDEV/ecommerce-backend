@@ -1,4 +1,7 @@
-const { CreatedSuccessResponse } = require("../core/success.response");
+const {
+  CreatedSuccessResponse,
+  SuccessResponse,
+} = require("../core/success.response");
 const AccessServiceSimple = require("../services/access_simple.service");
 
 class AccessController {
@@ -9,6 +12,12 @@ class AccessController {
       options: {
         limit: 10,
       },
+    }).send(res);
+  };
+
+  signIn = async (req, res, next) => {
+    new SuccessResponse({
+      metadata: await AccessServiceSimple.signIn(req.body),
     }).send(res);
   };
 }
